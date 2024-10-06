@@ -2,14 +2,20 @@ package com.shabinder.common.core_components.utils
 
 import com.shabinder.common.models.dispatcherIO
 import com.shabinder.common.utils.globalJson
-import io.ktor.client.*
-import io.ktor.client.features.*
-import io.ktor.client.features.json.*
-import io.ktor.client.features.json.serializer.*
-import io.ktor.client.features.logging.*
-import io.ktor.client.request.*
+import io.ktor.client.HttpClient
+import io.ktor.client.HttpClientConfig
+import io.ktor.client.features.HttpTimeout
+import io.ktor.client.features.json.JsonFeature
+import io.ktor.client.features.json.serializer.KotlinxSerializer
+import io.ktor.client.features.logging.DEFAULT
+import io.ktor.client.features.logging.LogLevel
+import io.ktor.client.features.logging.Logger
+import io.ktor.client.features.logging.Logging
+import io.ktor.client.request.HttpRequestBuilder
+import io.ktor.client.request.get
+import io.ktor.client.request.head
 import io.ktor.client.statement.HttpResponse
-import kotlinx.coroutines.Dispatchers
+import io.ktor.http.ContentType
 import kotlinx.coroutines.withContext
 import kotlin.native.concurrent.SharedImmutable
 
@@ -32,12 +38,12 @@ suspend inline fun HttpClient.getFinalUrl(
 ): String {
     return withContext(dispatcherIO) {
         runCatching {
-            get<HttpResponse>(url,block).call.request.url.toString()
+            get<HttpResponse>(url, block).call.request.url.toString()
         }.getOrNull() ?: url
     }
 }
 
-fun createHttpClient(enableNetworkLogs: Boolean = false) = HttpClient {
+fun createHttpClient(enableNetworkLogs: Boolean = false) = buildHttpClient {
     // https://github.com/Kotlin/kotlinx.serialization/issues/1450
     install(JsonFeature) {
         serializer = KotlinxSerializer(globalJson)
@@ -65,7 +71,8 @@ fun createHttpClient(enableNetworkLogs: Boolean = false) = HttpClient {
     }
 }
 
+expect fun buildHttpClient(extraConfig: HttpClientConfig<*>.() -> Unit): HttpClient
 
 /*Client Active Throughout App's Lifetime*/
 @SharedImmutable
-val ktorHttpClient = HttpClient {}
+private val ktorHttpClient = HttpClient {}

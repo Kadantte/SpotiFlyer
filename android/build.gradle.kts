@@ -55,6 +55,7 @@ android {
         targetSdk = Versions.targetSdkVersion
         versionCode = Versions.versionCode
         versionName = Versions.versionName
+        ndkVersion = "21.4.7075529"
     }
     buildTypes {
         getByName("release") {
@@ -80,15 +81,6 @@ android {
     }
     packagingOptions {
         exclude("META-INF/*")
-    }
-    configurations {
-        "implementation" {
-            exclude(group = "androidx.compose.animation")
-            exclude(group = "androidx.compose.foundation")
-            exclude(group = "androidx.compose.material")
-            exclude(group = "androidx.compose.runtime")
-            exclude(group = "androidx.compose.ui")
-        }
     }
 }
 dependencies {
